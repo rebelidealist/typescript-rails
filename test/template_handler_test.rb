@@ -14,6 +14,7 @@ DummyApp.draw do
   get 'site/ref2_1'
   get 'site/ref2_2'
   get 'site/ref3_1'
+  get 'site/err1_1'
   get 'site/es5'
 end
 
@@ -56,5 +57,14 @@ class TemplateHandlerTest < ActiveSupport::TestCase
   test 'ES5 features' do
     get '/site/es5.js'
     assert_equal 200, last_response.status
+  end
+
+  test 'error handling 1' do
+    msg = assert_raises(ActionView::Template::Error) do
+      get '/site/err1_1.js'
+    end
+    errs = msg.to_s.lines.map &:chomp
+    assert_match /\s*\.js\.ts\(1,6\): error TS1005: ';' expected\./, errs[0]
+    assert_match /\s*\.js\.ts\(2,6\): error TS1005: ';' expected\./, errs[1]
   end
 end

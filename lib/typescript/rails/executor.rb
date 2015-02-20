@@ -8,21 +8,20 @@ module Typescript::Rails::Executor
     end
 
     def compile_file(source_path, *tsc_options)
-      output_f = Tempfile.new('ts_out')
+      output_f = Tempfile.new(['ts_out', '.js'])
 
       # execute 'tsc'
       cmd = [tsc_path, *tsc_options, '--out', output_f.path, source_path]
-      exit_status, stdout, stderr = Open3.popen3(*cmd) do |stdin, stdout, stderr, th|
+      exit_status, logs = Open3.popen2e(*cmd) do |stdin, stdout_err, th|
           stdin.close
-          [th.value, stdout.read, stderr.read]
+          [th.value, stdout_err.read]
       end
 
       output_js = File.exists?(output_f.path) ? File.read(output_f.path) : nil
       return {
         result_code: output_js,
         status_code: exit_status,
-        stdout: stdout,
-        stderr: stderr
+        logs: logs,
       }
 
     ensure
@@ -30,7 +29,7 @@ module Typescript::Rails::Executor
     end
 
     def compile(source_code, *tsc_options)
-      path = Tempfile.open(['rails-typescript', '.ts']) do |f|
+      path = Tempfile.open(['rails-typescript', '.js.ts']) do |f|
         f.write(source_code)
         f.path
       end
@@ -39,7 +38,7 @@ module Typescript::Rails::Executor
       if result[:status_code] == 0
         result[:result_code]
       else
-        raise result[:stderr]
+        raise result[:logs]
       end
     end
   end

@@ -1,5 +1,5 @@
 require 'typescript/rails'
-require 'typescript-node'
+require_relative 'executor'
 
 module Typescript::Rails::Compiler
   class << self
@@ -32,13 +32,13 @@ module Typescript::Rails::Compiler
     # @return [String] compiled JavaScript source code
     def compile(ts_path, source, *options)
       s = replace_relative_references(ts_path, source)
-      ::TypeScript::Node.compile(s, *default_options, *options)
+      ::Typescript::Rails::Executor.compile(s, *default_options, *options)
     end
-
   end
 
   self.default_options = [
       '--target', 'ES5',
-      '--noImplicitAny'
+      '--noImplicitAny',
+      '--removeComments'  # to hide absolute paths
   ]
 end

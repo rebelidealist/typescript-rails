@@ -34,11 +34,12 @@ class AssetsTest < ActiveSupport::TestCase
   def assets
     @app.assets
   end
-
+=begin
   test "typescript.js is included in Sprockets environment" do
     assert { assets["typescript"].pathname.to_s.end_with?('/lib/assets/javascripts/typescript.js.erb') }
     assert { assets["typescript"].body.include?('var TypeScript') }
   end
+=end
 
   test "assets .js.ts is compiled from TypeScript to JavaScript" do
     assert { assets["javascripts/hello"].present? }
